@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_open,btn_scan,btn_close;
     //textview
     private TextView tv_info;
-    //已配对列表+未配对列表
+    //已配对列表
     private ListView list_paired;
     //已配对列表data
     private List<BluetoothDevice> devices_paired = new ArrayList<BluetoothDevice>();
@@ -68,7 +68,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         list_paired.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Intent intent = new Intent(MainActivity.this,BluetoothChat.class);
+                intent.putExtra("device_name",devices_paired.get(position).getName().toString());
+                intent.putExtra("device_addr",devices_paired.get(position).getAddress().toString());
+                startActivity(intent);
             }
         });
 
@@ -214,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     //接受从DeviceListActivity中返回的蓝牙Address的值
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
