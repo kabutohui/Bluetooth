@@ -5,7 +5,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,11 +18,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
+
+import cn.edu.xidian.bluetoothdemo.fileView.SelectFileActivity;
 
 /**
  * Created by lenovo on 2017/12/12.
@@ -44,6 +49,7 @@ public class BluetoothChat extends Activity implements View.OnClickListener {
     private EditText et_msg;
     private Button btn_send;
     private ListView lv_message;
+    private Button btn_filesend;
     // 获取目标设备
     private BluetoothDevice desDevice;
     // 获取到选中设备的客户端串口
@@ -53,6 +59,10 @@ public class BluetoothChat extends Activity implements View.OnClickListener {
     private BluetoothSocket socket;// 获取到客户端的接口
     // 获取到向设备写的输出流
     private OutputStream os;
+    //获取欲发送文件绝对路径相应代码
+    private static final int REQUEST_CODE_FOR_FILEABSOLUTEPATH = 3;
+    //文件发送socket
+    private BluetoothSocket btSocket;
 
 
     @Override
@@ -77,7 +87,10 @@ public class BluetoothChat extends Activity implements View.OnClickListener {
         thread.start();
     }
 
+
+
     private void initData() {
+
         //初始化蓝牙Adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -85,9 +98,11 @@ public class BluetoothChat extends Activity implements View.OnClickListener {
         et_msg = findViewById(R.id.etMessage);
         btn_send = findViewById(R.id.btn_send);
         lv_message = findViewById(R.id.message_list);
+        btn_filesend = findViewById(R.id.btn_filesend);
 
         //监听发送按钮
         btn_send.setOnClickListener(this);
+        btn_filesend.setOnClickListener(this);
 
         //初始化list
         mArray = new ArrayList<BluetoothChatMsg>();
@@ -147,6 +162,11 @@ public class BluetoothChat extends Activity implements View.OnClickListener {
                     // 如果发生异常则告诉用户发送失败
                     Toast.makeText(this, "发送信息失败", Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case R.id.btn_filesend:
+                //打开文件浏览
+                Intent serverIntent = new Intent(this, SelectFileActivity.class);
+                startActivityForResult(serverIntent, REQUEST_CODE_FOR_FILEABSOLUTEPATH);
                 break;
         }
     }
@@ -214,6 +234,29 @@ public class BluetoothChat extends Activity implements View.OnClickListener {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case REQUEST_CODE_FOR_FILEABSOLUTEPATH:
+                if (resultCode == Activity.RESULT_OK){
+                    //返回的data是所选择文件的绝对路径
+                    String path = data.getExtras().getString("fileAbsolutePath");
+                    Toast.makeText(this,"返回的路径为："+path,Toast.LENGTH_LONG).show();
+
+                    Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                    sharingIntent.setType("*/*");
+                    sharingIntent.setComponent(new ComponentName("com.android.bluetooth", "com.android.bluetooth.opp.BluetoothOppLauncherActivity"));
+                  sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
+                    //此种方法兼容android 7.0以上版本，并向下兼容低版本的android系统
+//                    sharingIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(BluetoothChat.this,"cn.edu.xidian.bluetoothdemo"+".fileprovider",new File(path)));
+//                    sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    startActivity(sharingIntent);
+                }
+                break;
         }
     }
 }

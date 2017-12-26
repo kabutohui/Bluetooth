@@ -4,13 +4,29 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:textSize="25dp"
-        android:textColor="#ffffffff"
-        android:background="#1296db"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/tv_title"
+            android:textSize="20dp"
+            android:textColor="#ffffffff"
+            android:background="#1296db"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:gravity="center|left"
+            android:layout_weight="1"/>
+        <Button
+            android:id="@+id/btn_filesend"
+            android:text = "文件传输"
+            android:textSize="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+    </LinearLayout>
+
 
     <ListView
         android:id="@+id/message_list"
